@@ -32,7 +32,7 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// <summary> 
 	/// 
 	/// </summary>
-	[SerializeField] protected float m_PlayerRoateSpeed = 60.0f;
+	[SerializeField] protected float m_PlayerRotateSpeed = 60.0f;
 	/// <summary> 
 	/// 
 	/// </summary>
@@ -81,6 +81,29 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// <summary> 
 	/// 
 	/// </summary>
+	protected float m_PlayerAddJumpPower = 0.0f;
+	/// <summary> 
+	/// 
+	/// </summary>
+	protected Vector3 m_GroundRayPos;
+	/// <summary> 
+	/// 
+	/// </summary>
+	protected float m_GroundRayDistance;
+	/// <summary> 
+	/// 
+	/// </summary>
+	protected bool m_IsGrounded;
+	/// <summary> 
+	/// 
+	/// </summary>
+	public bool isGrounded {
+		get { return m_IsGrounded; }
+		protected set { m_IsGrounded = value; }
+	}
+	/// <summary> 
+	/// 
+	/// </summary>
 	protected Vector3 m_CameraNewAngle;
 	protected bool m_JumpButtonPushingFlag;
 	#endregion
@@ -104,6 +127,8 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// </summary>
 	protected virtual void Update () {
 
+		groundRayUpdate();
+
 		cameraRotateUpdate();
 
 		playerRotateUpdate();
@@ -125,6 +150,10 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	protected virtual void LateUpdate(){
 
 	}
+
+	protected virtual void OnTriggerEnter(Collider other) {
+		Debug.Log("きた");
+	}
 	#endregion
 
 	// --------
@@ -140,14 +169,23 @@ public class BaseFpsPlayerController : MonoBehaviour {
 		);
 
 		//上方向に回転
+		#if UNITY_EDITOR
+		if(Input.GetKey(KeyCode.UpArrow)){
+		#else
 		if (CrossPlatformInputManager.GetButton("PlayerCameraRotateUp")){
+		#endif
 			m_CameraNewAngle.x -= m_CameraVerticalRotateSpeed * Time.deltaTime;
 			if(m_CameraNewAngle.x > m_CameraDownAngleMax && m_CameraNewAngle.x < m_CameraUpAngleMax){
 				m_CameraNewAngle.x = m_CameraUpAngleMax;
 			}
 		}
+
 		//下方向に回転
+		#if UNITY_EDITOR
+		if(Input.GetKey(KeyCode.DownArrow)){
+		#else
 		if (CrossPlatformInputManager.GetButton("PlayerCameraRotateDown")){
+		#endif
 			m_CameraNewAngle.x += m_CameraVerticalRotateSpeed * Time.deltaTime;
 			if(m_CameraNewAngle.x < m_CameraUpAngleMax && m_CameraNewAngle.x > m_CameraDownAngleMax){
 				m_CameraNewAngle.x = m_CameraDownAngleMax;
@@ -181,11 +219,21 @@ public class BaseFpsPlayerController : MonoBehaviour {
 			m_PlayerTransform.localEulerAngles.z
 		);
 
+
+		#if UNITY_EDITOR
+		if(Input.GetKey(KeyCode.LeftArrow)){
+		#else
 		if (CrossPlatformInputManager.GetButton("PlayerRotateLeft")){
-			m_PlayerNewAngle.y -= m_PlayerRoateSpeed * Time.deltaTime;
+		#endif
+			m_PlayerNewAngle.y -= m_PlayerRotateSpeed * Time.deltaTime;
 		}
+
+		#if UNITY_EDITOR
+		if(Input.GetKey(KeyCode.RightArrow)){
+		#else
 		if (CrossPlatformInputManager.GetButton("PlayerRotateRight")){
-			m_PlayerNewAngle.y += m_PlayerRoateSpeed * Time.deltaTime;
+		#endif
+			m_PlayerNewAngle.y += m_PlayerRotateSpeed * Time.deltaTime;
 		}
 
 		m_PlayerTransform.localEulerAngles = m_PlayerNewAngle;
@@ -200,45 +248,109 @@ public class BaseFpsPlayerController : MonoBehaviour {
 		m_PlayerMoveDetection = Vector3.zero;
 
 		//前進
+		#if UNITY_EDITOR
+		if(Input.GetKey(KeyCode.W)){
+		#else
 		if(CrossPlatformInputManager.GetButton("PlayerMoveForward")){
+		#endif
 			m_PlayerMoveDetection.z += 1.0f;
 		}
+
 		//後退
+		#if UNITY_EDITOR
+		if (Input.GetKey(KeyCode.S)){
+		#else
 		if(CrossPlatformInputManager.GetButton("PlayerMoveBack")){
+		#endif
 			m_PlayerMoveDetection.z -= 1.0f;
 		}
+
 		//左平行移動
+		#if UNITY_EDITOR
+		if (Input.GetKey(KeyCode.A)){
+		#else
 		if(CrossPlatformInputManager.GetButton("PlayerMoveLeft")){
+		#endif
 			m_PlayerMoveDetection.x -= 1.0f;
 		}
+
 		//右平行移動
+		#if UNITY_EDITOR
+		if (Input.GetKey(KeyCode.D)){
+		#else
 		if(CrossPlatformInputManager.GetButton("PlayerMoveRight")){
+		#endif
 			m_PlayerMoveDetection.x += 1.0f;
 		}
 
 		m_PlayerMoveVelocity = this.transform.TransformDirection(m_PlayerMoveDetection);
 		m_PlayerMoveVelocity *= m_PlayerMoveSpeed; //移動スピード
 
-		//ジャンプ
-		if(!m_JumpButtonPushingFlag && CrossPlatformInputManager.GetButtonDown("PlayerJump")){
-			if(m_CharacterController.isGrounded){
-				Debug.Log("JUMP");
-				m_PlayerMoveVelocity.y += m_PlayerJumpPower;
-			}
-			m_JumpButtonPushingFlag = true;
-		}else if(CrossPlatformInputManager.GetButtonUp("PlayerJump")){
-			m_JumpButtonPushingFlag = false;
+		//ジャンプと落下処理 =========================
+		if (!isGrounded){
+			m_PlayerAddJumpPower -= m_PlayerGravity; //重力
+			m_PlayerMoveVelocity.y += m_PlayerAddJumpPower;
+		}else{
+			m_PlayerMoveVelocity.y -= m_PlayerGravity; //重力
 		}
 
-		m_PlayerMoveVelocity.y -= m_PlayerGravity; //重力
+#if UNITY_EDITOR
+		if (!m_JumpButtonPushingFlag && Input.GetKeyDown(KeyCode.RightShift)){
+#else
+		if(!m_JumpButtonPushingFlag && CrossPlatformInputManager.GetButtonDown("PlayerJump")){
+#endif
+			if(isGrounded){
+				m_PlayerAddJumpPower = m_PlayerJumpPower;
+				m_PlayerMoveVelocity.y += m_PlayerAddJumpPower;
+			}
+			m_JumpButtonPushingFlag = true;
+#if UNITY_EDITOR
+		}else if(Input.GetKeyUp(KeyCode.RightShift)){
+#else
+		}else if(CrossPlatformInputManager.GetButtonUp("PlayerJump")){
+#endif
+			m_JumpButtonPushingFlag = false;
+		}
+		// =========================================
 
 		m_CharacterController.Move(m_PlayerMoveVelocity * Time.deltaTime);
 
 	}
-	#endregion
+
+	/// <summary>
+	/// 着地判定
+	/// </summary>
+	protected virtual void groundRayUpdate(){
+
+		RaycastHit hit;
+		m_GroundRayPos = m_PlayerTransform.position + m_CharacterController.center;
+		m_GroundRayDistance = (m_CharacterController.height / 2) - (m_CharacterController.radius / 2);
+
+		// Debug.Log("MOB- m_GroundRayPos : " + m_GroundRayPos);
+		// Debug.Log("MOB- m_GroundRayDistance : " + m_GroundRayDistance);
+
+		if(Physics.SphereCast(m_GroundRayPos, m_CharacterController.radius, m_PlayerTransform.TransformDirection(Vector3.down), out hit, m_GroundRayDistance)){
+			if(!isGrounded){
+
+				m_PlayerTransform.position = new Vector3(
+					m_PlayerTransform.position.x,
+					hit.point.y + (m_CharacterController.height / 2),
+					m_PlayerTransform.position.z
+				);
+
+				isGrounded = true;
+			}
+		}else{
+			isGrounded = false;
+		}
+
+		Debug.Log("MOB- isGrounded : "+isGrounded);
+
+	}
+#endregion
 
 	// --------
-	#region インナークラス
-	#endregion
+#region インナークラス
+#endregion
 
 }
