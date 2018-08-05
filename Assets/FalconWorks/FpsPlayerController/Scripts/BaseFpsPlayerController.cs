@@ -27,16 +27,24 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// <summary> 
 	/// 
 	/// </summary>
-	[SerializeField] protected float m_PlayerGravity = 6.4f;
+	[SerializeField] protected float m_PlayerGravity = 1.0f;
+	/// <summary> 
+	/// プレイヤーのジャンプ力
+	/// </summary>
+	[SerializeField] protected float m_PlayerJumpPower = 20.0f;
+	/// <summary> 
+	/// プレイヤーのホバリング力
+	/// </summary>
+	[SerializeField] protected float m_PlayerHoveringPower = 3.0f;
+	/// <summary> 
+	/// プレイヤーの最大ホバリング力
+	/// </summary>
+	[SerializeField] protected float m_MaxPlayerHoveringPower = 6.0f;
 	[Header("*Player Rotation Setting")]
 	/// <summary> 
 	/// 
 	/// </summary>
 	[SerializeField] protected float m_PlayerRotateSpeed = 60.0f;
-	/// <summary> 
-	/// 
-	/// </summary>
-	[SerializeField] protected float m_PlayerJumpPower = 120.0f;
 	[Header("*Camera Rotation Setting")]
 	/// <summary> 
 	/// 
@@ -85,6 +93,10 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// <summary> 
 	/// 
 	/// </summary>
+	protected float m_PlayerAddHoveringPower = 0.0f;
+	/// <summary> 
+	/// 
+	/// </summary>
 	protected Vector3 m_GroundRayPos;
 	/// <summary> 
 	/// 
@@ -106,6 +118,17 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// </summary>
 	protected Vector3 m_CameraNewAngle;
 	protected bool m_JumpButtonPushingFlag;
+	/// <summary>
+	/// ホバリングモードフラグ
+	/// </summary>
+	protected bool m_IsHovering;
+	/// <summary>
+	/// ホバリングモードフラグ
+	/// </summary>
+	public bool IsHovering {
+		get { return m_IsHovering; }
+		protected set { m_IsHovering = value; }
+	}
 	#endregion
 
 	// --------
@@ -223,7 +246,7 @@ public class BaseFpsPlayerController : MonoBehaviour {
 		#if UNITY_EDITOR
 		if(Input.GetKey(KeyCode.LeftArrow)){
 		#else
-		if (CrossPlatformInputManager.GetButton("PlayerRotateLeft")){
+		if(CrossPlatformInputManager.GetButton("PlayerRotateLeft")){
 		#endif
 			m_PlayerNewAngle.y -= m_PlayerRotateSpeed * Time.deltaTime;
 		}
@@ -231,7 +254,7 @@ public class BaseFpsPlayerController : MonoBehaviour {
 		#if UNITY_EDITOR
 		if(Input.GetKey(KeyCode.RightArrow)){
 		#else
-		if (CrossPlatformInputManager.GetButton("PlayerRotateRight")){
+		if(CrossPlatformInputManager.GetButton("PlayerRotateRight")){
 		#endif
 			m_PlayerNewAngle.y += m_PlayerRotateSpeed * Time.deltaTime;
 		}
@@ -286,32 +309,60 @@ public class BaseFpsPlayerController : MonoBehaviour {
 		m_PlayerMoveVelocity = this.transform.TransformDirection(m_PlayerMoveDetection);
 		m_PlayerMoveVelocity *= m_PlayerMoveSpeed; //移動スピード
 
-		//ジャンプと落下処理 =========================
-		if (!isGrounded){
-			m_PlayerAddJumpPower -= m_PlayerGravity; //重力
-			m_PlayerMoveVelocity.y += m_PlayerAddJumpPower;
-		}else{
-			m_PlayerMoveVelocity.y -= m_PlayerGravity; //重力
-		}
+		if(IsHovering){
 
-#if UNITY_EDITOR
-		if (!m_JumpButtonPushingFlag && Input.GetKeyDown(KeyCode.RightShift)){
-#else
-		if(!m_JumpButtonPushingFlag && CrossPlatformInputManager.GetButtonDown("PlayerJump")){
-#endif
-			if(isGrounded){
-				m_PlayerAddJumpPower = m_PlayerJumpPower;
-				m_PlayerMoveVelocity.y += m_PlayerAddJumpPower;
+			//ホバリングと落下処理 =========================
+			#if UNITY_EDITOR
+			if (Input.GetKey(KeyCode.RightShift)){
+			#else
+			if (CrossPlatformInputManager.GetButton("PlayerJump")){
+			#endif
+				m_PlayerAddHoveringPower += m_PlayerHoveringPower;
+				if(m_PlayerAddHoveringPower > m_MaxPlayerHoveringPower){
+					m_PlayerAddHoveringPower = m_MaxPlayerHoveringPower;
+				}
+			}else{
+				m_PlayerAddHoveringPower -= m_PlayerHoveringPower * 0.3f;
 			}
-			m_JumpButtonPushingFlag = true;
-#if UNITY_EDITOR
-		}else if(Input.GetKeyUp(KeyCode.RightShift)){
-#else
-		}else if(CrossPlatformInputManager.GetButtonUp("PlayerJump")){
-#endif
-			m_JumpButtonPushingFlag = false;
+
+			if(m_PlayerAddHoveringPower < 0.0f){
+				m_PlayerAddHoveringPower = 0.0f;
+			}else{
+				m_PlayerMoveVelocity.y += m_PlayerAddHoveringPower;
+			}
+
+			m_PlayerMoveVelocity.y -= m_PlayerGravity * 3.0f; //重力
+
+		}else{
+
+			//ジャンプと落下処理 =========================
+			if (!isGrounded){
+				m_PlayerAddJumpPower -= m_PlayerGravity; //重力
+				m_PlayerMoveVelocity.y += m_PlayerAddJumpPower;
+			}else{
+				m_PlayerMoveVelocity.y -= m_PlayerGravity; //重力
+			}
+
+			#if UNITY_EDITOR
+			if (!m_JumpButtonPushingFlag && Input.GetKeyDown(KeyCode.RightShift)){
+			#else
+			if(!m_JumpButtonPushingFlag && CrossPlatformInputManager.GetButtonDown("PlayerJump")){
+			#endif
+				if(isGrounded){
+					m_PlayerAddJumpPower = m_PlayerJumpPower;
+					m_PlayerMoveVelocity.y += m_PlayerAddJumpPower;
+				}
+				m_JumpButtonPushingFlag = true;
+			#if UNITY_EDITOR
+			}else if(Input.GetKeyUp(KeyCode.RightShift)){
+			#else
+			}else if(CrossPlatformInputManager.GetButtonUp("PlayerJump")){
+			#endif
+				m_JumpButtonPushingFlag = false;
+			}
+			// =========================================
+
 		}
-		// =========================================
 
 		m_CharacterController.Move(m_PlayerMoveVelocity * Time.deltaTime);
 
@@ -344,13 +395,21 @@ public class BaseFpsPlayerController : MonoBehaviour {
 			isGrounded = false;
 		}
 
-		Debug.Log("MOB- isGrounded : "+isGrounded);
+		// Debug.Log("MOB- isGrounded : "+isGrounded);
 
 	}
-#endregion
+
+	/// <summary>
+	/// ホバリング機能ON・OFF関数
+	/// </summary>
+	/// <param name="_flag">ホバリングモードフラグ</param>
+	public virtual void chgHoveringMode(bool _flag){
+		IsHovering = _flag;
+	}
+	#endregion
 
 	// --------
-#region インナークラス
-#endregion
+	#region インナークラス
+	#endregion
 
 }

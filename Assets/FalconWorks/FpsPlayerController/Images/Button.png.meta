@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: d9ce8b4558791466294638d363af8216
-timeCreated: 1530608360
-licenseType: Pro
+timeCreated: 1533435579
+licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
     21300000: Button-Up-Orange
@@ -16,6 +16,11 @@ TextureImporter:
     21300018: Button-B
     21300020: Button-X
     21300022: Button-Y
+    21300024: Button-Rotate-Left-Blue
+    21300026: Button-Rotate-Right-Blue
+    21300028: Button-Blue
+    21300030: Button-Jetpack-Off
+    21300032: Button-Jetpack-On
   externalObjects: {}
   serializedVersion: 4
   mipmaps:
@@ -69,7 +74,7 @@ TextureImporter:
   textureFormatSet: 0
   platformSettings:
   - buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -78,7 +83,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
   - buildTarget: Standalone
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -87,7 +92,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
   - buildTarget: iPhone
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -96,7 +101,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
   - buildTarget: Android
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -105,7 +110,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
   - buildTarget: WebGL
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -121,7 +126,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 320
+        y: 884
         width: 140
         height: 140
       alignment: 0
@@ -135,7 +140,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 160
-        y: 320
+        y: 884
         width: 140
         height: 140
       alignment: 0
@@ -149,7 +154,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 320
-        y: 320
+        y: 884
         width: 140
         height: 140
       alignment: 0
@@ -163,7 +168,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 480
-        y: 320
+        y: 884
         width: 140
         height: 140
       alignment: 0
@@ -177,7 +182,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 160
+        y: 724
         width: 140
         height: 140
       alignment: 0
@@ -191,7 +196,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 160
-        y: 160
+        y: 724
         width: 140
         height: 140
       alignment: 0
@@ -205,7 +210,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 320
-        y: 160
+        y: 724
         width: 140
         height: 140
       alignment: 0
@@ -219,7 +224,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 480
-        y: 160
+        y: 724
         width: 140
         height: 140
       alignment: 0
@@ -233,7 +238,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 564
         width: 140
         height: 140
       alignment: 0
@@ -246,8 +251,8 @@ TextureImporter:
       name: Button-B
       rect:
         serializedVersion: 2
-        x: 160
-        y: 0
+        x: 161
+        y: 565
         width: 140
         height: 140
       alignment: 0
@@ -261,7 +266,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 320
-        y: 0
+        y: 564
         width: 140
         height: 140
       alignment: 0
@@ -275,11 +280,81 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 480
-        y: 0
+        y: 564
         width: 140
         height: 140
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Button-Rotate-Left-Blue
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 724
+        width: 140
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Button-Rotate-Right-Blue
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 724
+        width: 140
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Button-Blue
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 404
+        width: 140
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Button-Jetpack-Off
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 244
+        width: 140
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Button-Jetpack-On
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 244
+        width: 140
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
