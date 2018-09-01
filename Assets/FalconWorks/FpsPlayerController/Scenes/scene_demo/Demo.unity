@@ -201,6 +201,7 @@ MonoBehaviour:
   m_PlayerTransform: {fileID: 62928865}
   m_CameraTransform: {fileID: 802422419}
   m_PlayerMoveSpeed: 3
+  m_PlayerDashMoveSpeed: 6
   m_PlayerGravity: 1
   m_PlayerJumpPower: 20
   m_PlayerHoveringPower: 3
@@ -712,6 +713,21 @@ Prefab:
         type: 2}
       propertyPath: m_Pivot.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114099762046961916, guid: 583ba70408e8547a8be81b5a2f3b034e,
+        type: 2}
+      propertyPath: Name
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114913833271197518, guid: 583ba70408e8547a8be81b5a2f3b034e,
+        type: 2}
+      propertyPath: Name
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114388531650356886, guid: 583ba70408e8547a8be81b5a2f3b034e,
+        type: 2}
+      propertyPath: Name
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 583ba70408e8547a8be81b5a2f3b034e, type: 2}

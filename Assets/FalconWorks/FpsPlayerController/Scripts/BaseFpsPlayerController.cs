@@ -27,6 +27,10 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// <summary> 
 	/// 
 	/// </summary>
+	[SerializeField] protected float m_PlayerDashMoveSpeed = 6.0f;
+	/// <summary> 
+	/// 
+	/// </summary>
 	[SerializeField] protected float m_PlayerGravity = 1.0f;
 	/// <summary> 
 	/// プレイヤーのジャンプ力
@@ -129,6 +133,22 @@ public class BaseFpsPlayerController : MonoBehaviour {
 		get { return m_IsHovering; }
 		protected set { m_IsHovering = value; }
 	}
+	/// <summary>
+	/// ダッシュフラグ
+	/// </summary>
+	protected bool m_DashModeFlag;
+	/// <summary>
+	/// 移動ボタンを押下中フラグ
+	/// </summary>
+	protected bool m_MoveButtonPushingFlag;
+	/// <summary>
+	/// 最初に移動ボタンが押されてからの経過時間
+	/// </summary>
+	protected float m_MoveButtonPushingElapsedTime;
+	/// <summary>
+	/// 次に移動ボタンが押されるまでの時間
+	/// </summary>	
+	protected float m_nextMoveButtonDownTime = 1.0f;
 	#endregion
 
 	// --------
@@ -149,6 +169,8 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	/// 更新処理
 	/// </summary>
 	protected virtual void Update () {
+
+		dashModeFlagUpdate();
 
 		groundRayUpdate();
 
@@ -182,9 +204,75 @@ public class BaseFpsPlayerController : MonoBehaviour {
 	// --------
 	#region メンバメソッド
 	/// <summary>
+	/// ダッシュモードフラグ更新処理
+	/// </summary>
+	protected virtual void dashModeFlagUpdate(){
+
+		if(!m_DashModeFlag){
+
+			/*--------------
+			* 通常時
+			--------------*/
+
+			#if UNITY_EDITOR
+			if(Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.W) ||
+			 Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.S)){
+			#else
+			if(CrossPlatformInputManager.GetButtonDown("PlayerMoveForward") ||
+			 CrossPlatformInputManager.GetButtonDown("PlayerMoveBack") ||
+			 CrossPlatformInputManager.GetButtonDown("PlayerMoveLeft") ||
+			 CrossPlatformInputManager.GetButtonDown("PlayerMoveRight")){
+			#endif
+				if(!m_MoveButtonPushingFlag){
+					//移動ボタン押下1回目
+					m_MoveButtonPushingFlag = true;
+					m_MoveButtonPushingElapsedTime = 0f;
+				}else{
+					//移動ボタン押下2回目
+					if(m_MoveButtonPushingElapsedTime <= m_nextMoveButtonDownTime){
+						m_DashModeFlag = true;
+					}
+				}
+			}
+
+		}else{
+
+			/*--------------
+			* ダッシュモード時
+			--------------*/
+
+			#if UNITY_EDITOR
+			if(!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.W) &&
+			 !Input.GetKey(KeyCode.D) && !Input.GetKey(KeyCode.S)){
+			#else
+			if(!CrossPlatformInputManager.GetButton("PlayerMoveForward") &&
+			 !CrossPlatformInputManager.GetButton("PlayerMoveBack") &&
+			 !CrossPlatformInputManager.GetButton("PlayerMoveLeft") &&
+			 !CrossPlatformInputManager.GetButton("PlayerMoveRight")){
+			#endif
+				m_MoveButtonPushingFlag = false;
+				m_DashModeFlag = false;
+			}
+
+		}
+
+		//最初の移動ボタンを押していれば時間計測
+		if(m_MoveButtonPushingFlag){
+			//時間計測
+			m_MoveButtonPushingElapsedTime += Time.deltaTime;
+
+			if(m_MoveButtonPushingElapsedTime > m_nextMoveButtonDownTime){
+				m_MoveButtonPushingFlag = false;
+			}
+		}
+
+	}
+
+	/// <summary>
 	/// プレイヤー主観用カメラの回転処理
 	/// </summary>
 	protected virtual void cameraRotateUpdate(){
+
 		m_CameraNewAngle　= new Vector3(
 			m_CameraTransform.localEulerAngles.x,
 			m_CameraTransform.localEulerAngles.y,
@@ -307,7 +395,12 @@ public class BaseFpsPlayerController : MonoBehaviour {
 		}
 
 		m_PlayerMoveVelocity = this.transform.TransformDirection(m_PlayerMoveDetection);
-		m_PlayerMoveVelocity *= m_PlayerMoveSpeed; //移動スピード
+
+		if(m_DashModeFlag){
+			m_PlayerMoveVelocity *= m_PlayerDashMoveSpeed; //移動スピード
+		}else{
+			m_PlayerMoveVelocity *= m_PlayerMoveSpeed; //移動スピード
+		}
 
 		if(IsHovering){
 
